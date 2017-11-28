@@ -1,0 +1,57 @@
+Popeyes Restaurant #s = each: 7310,3160,12165
+
+Net Sales = starts: 2999
+Other Vendor Rebates/Grease Sales = set: 0
+Other Non-Food Misc. Income = set: 0
+
+Food Cost = starts: 3997
+Logistics Cost = set: 0
+Paper Cost = starts: 4119
+
+Wages - Crew/Shift Supervisors(Full Time) = starts: 5108
+Wages - Crew/Shift Supervisors (Part Time) = set: 0
+Overtime - Crew/Shift Supervisors = set: 0
+Wages - Store Managers = starts: 5109
+Paid Time Off = set: 0
+Bonuses = starts: 5111
+Workers Compensation Insurance = starts: 5112
+Fringe Benefits = set: 0
+Other Personnel Expenses = starts: 5501
+
+Repairs & Maintenance - Building & Property = starts: 5616
+Repairs & Maintenance - Equipment = starts: 5617
+Repairs & Maintenance - POS = set: 0
+Cleaning Supplies = starts: 5619
+Smallwares/kitchen items = set: 0
+Other Supplies = starts: 5625
+Technology = starts: 5626
+Communication = starts: 5627
+Security = starts: 5628
+Utilities - Electric = starts: 5629
+Utilities - Gas = starts: 5630
+Utilities - Water and Sewer = starts: 5631
+Monthly Services & Trash = starts: 5632
+Credit Card Fees = starts: 5633
+Bank Service Charges = starts: 5634
+Uniforms/laundry/linen = starts: 5635
+Cash Over/Short = starts: 5636
+Home delivery fee = set: 0
+Miscellaneous  = starts: 5640
+
+Ad Fund = starts: 6100
+LSM = contains: LSM
+Royalties = starts: 6104
+General Liability Insurance = starts: 6251
+Licenses/Taxes/Other = starts: 6500
+
+Rent Equipment = starts: 6606
+Rent Building & Property- Fixed = starts: 6607
+Rent Building & Property- Variable = starts: 6655
+
+Debt Service = set: 0
+Management Service = set: 0
+Interest = starts: 6706
+Depreciation/Amortization = set: 0
+G&A = starts: 7000
+Reimage Expense = set: 0
+Beverage Credits = set: 0
