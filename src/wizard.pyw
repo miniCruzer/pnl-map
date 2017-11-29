@@ -26,11 +26,12 @@ spreadsheet.
 
 import os
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import (QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
-                             QLabel, QLineEdit, QMessageBox, QPushButton,
-                             QSpinBox, QTableWidget, QTableWidgetItem,
-                             QVBoxLayout, QWizard, QWizardPage)
+                             QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
+                             QProgressBar, QPushButton, QSpinBox, QTableWidget,
+                             QTableWidgetItem, QVBoxLayout, QWizard,
+                             QWizardPage)
 
 from .libexcel import (workbook_close, workbook_list_sheets, workbook_load,
                        worksheet_cell_set_raw, worksheet_iter, worksheet_load,
@@ -53,6 +54,81 @@ SRC_STOP = {"C": None, "D": None, "E": None, "F": None, "G": None, "H": None}
 DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')
 DST_STOP = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None,
             'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None}
+
+
+class Worker(QThread):
+
+    """ separate thread for working with Excel """
+
+    resultReady = pyqtSignal()
+    completedSheet = pyqtSignal(str)
+
+    def __init__(self, srcbk, dstbk, mapfile, sheet_map_src2dst, parent=None):
+        super(Worker, self).__init__(parent)
+
+        self.srcbkpath = srcbk
+        self.dstbkpath = dstbk
+        self.mapfile = mapfile
+        self.sheet_map_src2dst = sheet_map_src2dst
+
+    def run(self):
+
+        map_dict = {}
+        srcbk = workbook_load(self.srcbkpath)
+        dstbk = workbook_load(self.dstbkpath)
+
+        with open(self.mapfile) as fhandle:
+            map_dict = parse_map(fhandle.readlines())
+
+        for srcshname, dstshname in self.sheet_map_src2dst.items():
+
+            srcsh = worksheet_load(srcbk, srcshname)
+            dstsh = worksheet_load(dstbk, dstshname)
+
+            source_data = {}
+
+            for row, data in worksheet_iter(srcsh, 1, SRC_COLUMNS, SRC_STOP):
+
+                key = data["E"] or data["D"] or data["C"] or str(row)
+                values = data["F"], data["G"], data["H"]
+
+                if any(values):
+                    source_data[key] = values
+
+            for row, data in worksheet_iter(dstsh, 1, DST_COLUMNS, DST_STOP):
+                keyword = data['A']
+
+                if not keyword:
+                    continue
+
+                if keyword and keyword not in map_dict:
+                    continue
+
+                if row > 5:
+                    worksheet_set_number_format(
+                        dstsh, "B", row, "#,##0.00;-#,##0.00")
+                    worksheet_set_number_format(
+                        dstsh, "D", row, "#,##0.00;-#,##0.00")
+                    worksheet_set_number_format(
+                        dstsh, "F", row, "#,##0.00;-#,##0.00")
+
+                method, term = map_dict[keyword]
+
+                values = search_map(source_data, method, term)
+                if not values:
+                    worksheet_cell_set_raw(dstsh, "B", row, "0")
+                    worksheet_cell_set_raw(dstsh, "D", row, "0")
+                    worksheet_cell_set_raw(dstsh, "F", row, "0")
+                    continue
+
+                worksheet_cell_set_raw(dstsh, "B", row, values[0])
+                worksheet_cell_set_raw(dstsh, "D", row, values[1])
+                worksheet_cell_set_raw(dstsh, "F", row, values[2])
+
+            self.completedSheet.emit(dstsh.Name)
+
+        workbook_close(srcbk)
+        self.resultReady.emit()
 
 
 def sheet_mapper(srcbk, dstbk) -> QTableWidget:
@@ -234,84 +310,71 @@ class SheetMapPage(QWizardPage):
         self.table.horizontalHeader().setStretchLastSection(True)
 
         self.wizard().table = self.table
-        self.wizard().srcbk = srcbk
-        self.wizard().dstbk = dstbk
+
+        workbook_close(srcbk)
+        workbook_close(dstbk)
 
 
-class FinishPage(QWizardPage):
+class ConvertPage(QWizardPage):
 
     def __init__(self, parent=None):
-        super(FinishPage, self).__init__(parent=parent)
+        super(ConvertPage, self).__init__(parent=parent)
         self.setTitle("P&L Wizard - Finished")
-        self.setSubTitle("Data conversion completed. The completed workbook should now be open in"
-                         " Excel.")
+        self.setSubTitle(
+            "Please wait while the spreadsheets are converted ...")
+
+        self.mainLayout = QVBoxLayout(self)
+
+        self.pbar = QProgressBar(self)
+        self.pbar.setValue(0)
+
+        self.pwindow = QPlainTextEdit(self)
+        self.pwindow.setReadOnly(True)
+
+        self.complete = False
+
+        self.mainLayout.addWidget(self.pbar)
+        self.mainLayout.addWidget(self.pwindow)
 
     def initializePage(self):
         sheet_map_src2dst = {}
         table = self.wizard().table
 
-        srcbk = self.wizard().srcbk
-        dstbk = self.wizard().dstbk
+        srcpath = self.field(SOURCE_FIELD_NAME)
+        dstpath = self.field(DESTINATION_FIELD_NAME)
+        mapfile = self.wizard().mapFileBx.currentData()
 
-        for row in range(table.rowCount()):
+        sheets = table.rowCount()
+
+        for row in range(sheets):
             src = table.item(row, SRC_COL).text()
             dst = table.cellWidget(row, DST_COL).currentText()
 
             sheet_map_src2dst[src] = dst
 
-        # data mover
+        self.pbar.setMaximum(sheets)
+        self.pbar.show()
 
-        map_dict = {}
+        thread = Worker(srcpath, dstpath, mapfile, sheet_map_src2dst, self)
+        thread.completedSheet.connect(self.oneSheetDone)
+        thread.resultReady.connect(self.conversionComplete)
+        thread.start()
 
-        with open(self.wizard().mapFileBx.currentData()) as fhandle:
-            map_dict = parse_map(fhandle.readlines())
+    def oneSheetDone(self, name):
+        self.pwindow.setPlainText(
+            self.pwindow.toPlainText() + f"Finished {name} ...\n")
+        self.pbar.setValue(self.pbar.value() + 1)
+        self.completeChanged.emit()
 
-        for srcshname, dstshname in sheet_map_src2dst.items():
+    def conversionComplete(self):
+        self.complete = True
+        self.completeChanged.emit()
+        self.pwindow.setPlainText(
+            self.pwindow.toPlainText() + f"\nConversion completed. The completed spreadsheet should"
+            " now be open in Excel.")
 
-            srcsh = worksheet_load(srcbk, srcshname)
-            dstsh = worksheet_load(dstbk, dstshname)
-
-            source_data = {}
-
-            for row, data in worksheet_iter(srcsh, 1, SRC_COLUMNS, SRC_STOP):
-
-                key = data["E"] or data["D"] or data["C"] or str(row)
-                values = data["F"], data["G"], data["H"]
-
-                if any(values):
-                    source_data[key] = values
-
-            for row, data in worksheet_iter(dstsh, 1, DST_COLUMNS, DST_STOP):
-                keyword = data['A']
-
-                if not keyword:
-                    continue
-
-                if keyword and keyword not in map_dict:
-                    continue
-
-                if row > 5:
-                    worksheet_set_number_format(
-                        dstsh, "B", row, "#,##0.00;-#,##0.00")
-                    worksheet_set_number_format(
-                        dstsh, "D", row, "#,##0.00;-#,##0.00")
-                    worksheet_set_number_format(
-                        dstsh, "F", row, "#,##0.00;-#,##0.00")
-
-                method, term = map_dict[keyword]
-
-                values = search_map(source_data, method, term)
-                if not values:
-                    worksheet_cell_set_raw(dstsh, "B", row, "0")
-                    worksheet_cell_set_raw(dstsh, "D", row, "0")
-                    worksheet_cell_set_raw(dstsh, "F", row, "0")
-                    continue
-
-                worksheet_cell_set_raw(dstsh, "B", row, values[0])
-                worksheet_cell_set_raw(dstsh, "D", row, values[1])
-                worksheet_cell_set_raw(dstsh, "F", row, values[2])
-
-        workbook_close(srcbk)
+    def isComplete(self):
+        return self.complete
 
 
 class Wizard(QWizard):
@@ -334,7 +397,7 @@ class Wizard(QWizard):
         self.addPage(IntroPage(self))
         self.addPage(WorkbookPage(self))
         self.addPage(SheetMapPage(self))
-        self.addPage(FinishPage(self))
+        self.addPage(ConvertPage(self))
 
         self.setWindowTitle("QuickBooks to Popeyes Exporter")
         self.resize(640, 700)
