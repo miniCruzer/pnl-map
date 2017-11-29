@@ -88,7 +88,6 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, cons
         if values == until:
             matches += 1
             if matches == consecutive:
-                print(f"stopping at row {row}: {values}")
                 break
         else:
             matches = 0
