@@ -108,6 +108,8 @@ class WorkbookPage(QWizardPage):
 
         self.mainLayout = QFormLayout(self)
         self.setLayout(self.mainLayout)
+        self.setCommitPage(True)
+        self.setButtonText(QWizard.CommitButton, "Load Spreadsheets")
 
         # source workbook
         self.sourceBookPath = QLineEdit()
@@ -159,6 +161,7 @@ class WorkbookPage(QWizardPage):
         self.mainLayout.addWidget(self.invalidMap)
 
     def initializePage(self):
+        """ reimplemented function """
         self.wizard().mapFileBx = self.mapFileComboBox
 
     def validatePage(self):
@@ -208,8 +211,8 @@ class SheetMapPage(QWizardPage):
         self.table = QTableWidget()
         self.lastRowDst = QSpinBox()
         self.lastRowSrc = QSpinBox()
-
         self.setCommitPage(True)
+        self.setButtonText(QWizard.CommitButton, "Convert")
 
     def initializePage(self):
 
