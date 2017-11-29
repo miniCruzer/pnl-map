@@ -61,21 +61,21 @@ def worksheet_cell_set_raw(worksh, column: str, row: int, value: Any) -> None:
     worksh.Range(cell).Value2 = value
 
 
-def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, stop_row=0):
-    """
-    interate rows of a worksheet, yielding values of cells from each row.
+def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, consecutive=3):
+    """ iterate rows of a worksheet, yielding values of cells from each row.
 
     worksh - worksheet object to iterate
     start_row - row number >=1 to begin iterating
     get_columns - tuple of columns to retrieve values of
     until - dictionary columns to values - when all columns match these values, iteration will stop
-    stop_row - row number to top at if "until" is never met. set to 0 to disable
+    consecutive - number of consecutive rows that must match 'until' to stop iteration
     """
 
     if start_row < 1:
         raise ValueError("must start at row 1 or higher")
 
     row = start_row
+    matches = 0
 
     while True:
 
@@ -85,8 +85,13 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, stop
             value = worksheet_cell_get(worksh, column, row)
             values[column] = value
 
-        if values == until or (stop_row > 0 and row == stop_row):
-            break
+        if values == until:
+            matches += 1
+            if matches == consecutive:
+                print(f"stopping at row {row}: {values}")
+                break
+        else:
+            matches = 0
 
         yield row, values
 
