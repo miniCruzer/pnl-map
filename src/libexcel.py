@@ -15,7 +15,7 @@ import win32com.client as win32
 
 def workbook_load(path: str, visible=True):
     """ load an excel workbook """
-    excel = win32.gencache.EnsureDispatch("Excel.Application")
+    excel = win32.dynamic.Dispatch("Excel.Application")
     excel.Visible = visible
     excel.DisplayAlerts = False
     return excel.Workbooks.Open(path)
