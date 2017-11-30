@@ -60,6 +60,35 @@ DST_STOP = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None,
             'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None}
 
 
+class SheetLoaderThread(QThread):
+    """ load spreadsheets' sheet names in a separate thread """
+    resultReady = pyqtSignal(list)
+
+    def __init__(self, srcbkpath, dstbkpath, table, parent=None):
+        super(SheetLoaderThread, self).__init__(parent)
+
+        self.srcbkpath = srcbkpath
+        self.dstbkpath = dstbkpath
+        self.table = table
+
+    def run(self):
+
+        pythoncom.CoInitialize()  # pylint: disable=E1101
+
+        srcbk = workbook_load(self.srcbkpath)
+        dstbk = workbook_load(self.dstbkpath)
+
+        src_sheets = list(workbook_list_sheets(srcbk))
+        dst_sheets = list(workbook_list_sheets(dstbk))
+
+        rows = [(name, list(dst_sheets)) for name in src_sheets]
+
+        workbook_close(srcbk)
+        workbook_close(dstbk)
+
+        self.resultReady.emit(rows)
+
+
 class ConverterThread(QThread):
 
     """ separate thread for working with Excel """
@@ -78,7 +107,7 @@ class ConverterThread(QThread):
     def run(self):
 
         map_dict = {}
-        pythoncom.CoInitialize()
+        pythoncom.CoInitialize()  # pylint: disable=E1101
         srcbk = workbook_load(self.srcbkpath)
         dstbk = workbook_load(self.dstbkpath)
 
@@ -136,16 +165,14 @@ class ConverterThread(QThread):
         self.resultReady.emit()
 
 
-def sheet_mapper(srcbk, dstbk) -> QTableWidget:
+def sheet_mapper(rows, tbl) -> QTableWidget:
     """ create a sheet mapping QTableWidget. used for matching destination column names with source
     column names """
 
-    src_sheets = list(workbook_list_sheets(srcbk))
-    dst_sheets = list(workbook_list_sheets(dstbk))
+    tbl.setColumnCount(2)
+    tbl.setRowCount(len(rows))
 
-    tbl = QTableWidget(len(src_sheets), 2)
-
-    for idx, name in enumerate(src_sheets):
+    for idx, (name, dst_sheets) in enumerate(rows):
 
         # create item, make it uneditable
         item = QTableWidgetItem(name)
@@ -290,34 +317,42 @@ class SheetMapPage(QWizardPage):
 
         self.mainLayout = QVBoxLayout(self)
         self.table = QTableWidget()
+        self.mainLayout.addWidget(self.table)
+
         self.lastRowDst = QSpinBox()
         self.lastRowSrc = QSpinBox()
         self.setCommitPage(True)
         self.setButtonText(QWizard.CommitButton, "Convert")
+        self.complete = False
+        self.names = [""] * 2
 
     def initializePage(self):
+        """ fire the sheet loader thread and wait for it to finish """
 
         srcpath = self.field(SOURCE_FIELD_NAME)
         dstpath = self.field(DESTINATION_FIELD_NAME)
 
-        srcbk = workbook_load(srcpath)
-        dstbk = workbook_load(dstpath)
+        self.names[SRC_COL] = os.path.basename(srcpath)
+        self.names[DST_COL] = os.path.basename(dstpath)
 
-        self.table = sheet_mapper(srcbk, dstbk)
-        self.mainLayout.addWidget(self.table)
+        thread = SheetLoaderThread(srcpath, dstpath, self.table, self)
+        thread.resultReady.connect(self.sheetsLoaded)
+        thread.start()
 
-        names = [""] * 2
-        names[SRC_COL] = os.path.basename(srcpath)
-        names[DST_COL] = os.path.basename(dstpath)
+    def sheetsLoaded(self, rows):
+        """ called when the sheet loader thread finished loading sheets from both workbooks """
 
-        self.table.setHorizontalHeaderLabels(names)
+        sheet_mapper(rows, self.table)
+        self.table.setHorizontalHeaderLabels(self.names)
         self.table.resizeColumnsToContents()
         self.table.horizontalHeader().setStretchLastSection(True)
 
+        self.complete = True
+        self.completeChanged.emit()
         self.wizard().table = self.table
 
-        workbook_close(srcbk)
-        workbook_close(dstbk)
+    def isComplete(self):
+        return self.complete
 
 
 class ConvertPage(QWizardPage):
@@ -375,9 +410,10 @@ class ConvertPage(QWizardPage):
     def conversionComplete(self):
         self.complete = True
         self.completeChanged.emit()
+        self.setSubTitle(
+            "Conversion completed. The finished spreadsheet is open in Excel.")
         self.pwindow.setPlainText(
-            self.pwindow.toPlainText() + f"\nConversion completed. The completed spreadsheet should"
-            " now be open in Excel.")
+            self.pwindow.toPlainText() + f"Done.")
 
     def isComplete(self):
         return self.complete
