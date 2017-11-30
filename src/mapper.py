@@ -1,9 +1,4 @@
 """ map file instruction parser """
-#
-# Copyright (c) 2017 Samuel Hoffman
-#
-# Map file reader.
-#
 
 import re
 

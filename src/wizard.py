@@ -31,6 +31,7 @@ MAP_FIELD_NAME = "Map File"
 DST_COL = 1
 SRC_COL = 0
 
+# XXX: columns and stop columns should not be hardcoded
 SRC_COLUMNS = ('C', 'D', 'E', 'F', 'G', 'H')
 SRC_STOP = {"C": None, "D": None, "E": None, "F": None, "G": None, "H": None}
 DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')
@@ -50,6 +51,8 @@ class SheetLoaderThread(QThread):
         self.table = table
 
     def run(self):
+        """ prepare all spreadsheet names from the source sheet and the destination sheet and
+        prepare them into matrix of rows """
 
         pythoncom.CoInitialize()  # pylint: disable=E1101
 
@@ -83,7 +86,7 @@ class ConverterThread(QThread):
         self.sheet_map_src2dst = sheet_map_src2dst
 
     def run(self):
-
+        """ convert spreadsheet data """
         map_dict = {}
         pythoncom.CoInitialize()  # pylint: disable=E1101
         srcbk = workbook_load(self.srcbkpath)
@@ -116,7 +119,7 @@ class ConverterThread(QThread):
                 if keyword and keyword not in map_dict:
                     continue
 
-                if row > 5:
+                if row > 5:  # XXX: this should not be hardcoded
                     worksheet_set_number_format(
                         dstsh, "B", row, "#,##0.00;-#,##0.00")
                     worksheet_set_number_format(
@@ -126,6 +129,7 @@ class ConverterThread(QThread):
 
                 method, term = map_dict[keyword]
 
+                # XXX: these should not be hardcoded
                 values = search_map(source_data, method, term)
                 if not values:
                     worksheet_cell_set_raw(dstsh, "B", row, "0")
@@ -152,12 +156,10 @@ def sheet_mapper(rows, tbl) -> QTableWidget:
 
     for idx, (name, dst_sheets) in enumerate(rows):
 
-        # create item, make it uneditable
         item = QTableWidgetItem(name)
         item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         tbl.setItem(idx, SRC_COL, item)
 
-        # create a combo box to match the source sheet name with any destination sheet tname
         box = QComboBox(tbl)
         box.addItems(dst_sheets)
         tbl.setCellWidget(idx, DST_COL, box)
@@ -221,7 +223,7 @@ class WorkbookPage(QWizardPage):
 
         # map files
         self.mapFileComboBox = QComboBox()
-        for entry in os.scandir("maps"):
+        for entry in os.scandir("maps"):  # XXX: this should not be hardcoded
             name = os.path.basename(os.path.splitext(entry.name)[0]).title()
             self.mapFileComboBox.addItem(name, entry.path)
 
@@ -230,7 +232,6 @@ class WorkbookPage(QWizardPage):
         self.registerField(SOURCE_FIELD_NAME + "*", self.sourceBookPath)
         self.registerField(DESTINATION_FIELD_NAME + "*", self.destBookPath)
 
-        # validation failure reasons
         self.invalidSrc = QLabel(
             "<font color='red'>Unable to find source workbook.</font>")
         self.invalidDst = QLabel(
@@ -330,10 +331,12 @@ class SheetMapPage(QWizardPage):
         self.wizard().table = self.table
 
     def isComplete(self):
+        """ called to see if all spreadsheets have been loaded and the user is OK to continue """
         return self.complete
 
 
 class ConvertPage(QWizardPage):
+    """ Wizard page which converts QuickBooks data to Popeyes format """
 
     def __init__(self, parent=None):
         super(ConvertPage, self).__init__(parent=parent)
@@ -355,6 +358,8 @@ class ConvertPage(QWizardPage):
         self.mainLayout.addWidget(self.pwindow)
 
     def initializePage(self):
+        """ load the sheet map from the SheetMapPage, setup a progress bar, and start the
+        ConverterThread """
         sheet_map_src2dst = {}
         table = self.wizard().table
 
@@ -380,12 +385,16 @@ class ConvertPage(QWizardPage):
         thread.start()
 
     def oneSheetDone(self, name):
+        """ slot emitted by the converter thread when it completes a spreadsheet and emits its
+        name """
         self.pwindow.setPlainText(
             self.pwindow.toPlainText() + f"Finished {name} ...\n")
         self.pbar.setValue(self.pbar.value() + 1)
         self.completeChanged.emit()
 
     def conversionComplete(self):
+        """ callback for the converter thread to let the main thread know when all worksheets have
+        been converted """
         self.complete = True
         self.completeChanged.emit()
         self.setSubTitle(
@@ -394,6 +403,7 @@ class ConvertPage(QWizardPage):
             self.pwindow.toPlainText() + f"Done.")
 
     def isComplete(self):
+        """ called by QWizard to see if all sheets have been converted yet """
         return self.complete
 
 
@@ -409,11 +419,9 @@ class Wizard(QWizard):
         self.srcbk = None
         self.dstbk = None
 
-        # prevents initializePage from running 2x
         self.setOption(QWizard.IndependentPages, True)
         self.setOption(QWizard.HaveHelpButton, False)
 
-        # add pages
         self.addPage(IntroPage(self))
         self.addPage(WorkbookPage(self))
         self.addPage(SheetMapPage(self))
