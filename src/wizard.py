@@ -26,6 +26,7 @@ spreadsheet.
 
 import os
 
+import pythoncom
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import (QComboBox, QFileDialog, QFormLayout, QHBoxLayout,
                              QLabel, QLineEdit, QMessageBox, QPlainTextEdit,
@@ -37,6 +38,9 @@ from .libexcel import (workbook_close, workbook_list_sheets, workbook_load,
                        worksheet_cell_set_raw, worksheet_iter, worksheet_load,
                        worksheet_set_number_format)
 from .mapper import parse_map, search_map
+
+__version__ = "0.0.1"
+__author__ = "Samuel Hoffman"
 
 # pylint: disable=C0103
 
@@ -56,7 +60,7 @@ DST_STOP = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None,
             'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None}
 
 
-class Worker(QThread):
+class ConverterThread(QThread):
 
     """ separate thread for working with Excel """
 
@@ -64,7 +68,7 @@ class Worker(QThread):
     completedSheet = pyqtSignal(str)
 
     def __init__(self, srcbk, dstbk, mapfile, sheet_map_src2dst, parent=None):
-        super(Worker, self).__init__(parent)
+        super(ConverterThread, self).__init__(parent)
 
         self.srcbkpath = srcbk
         self.dstbkpath = dstbk
@@ -74,6 +78,7 @@ class Worker(QThread):
     def run(self):
 
         map_dict = {}
+        pythoncom.CoInitialize()
         srcbk = workbook_load(self.srcbkpath)
         dstbk = workbook_load(self.dstbkpath)
 
@@ -165,7 +170,7 @@ class IntroPage(QWizardPage):
 
         self.setTitle("P&L Wizard")
         self.setSubTitle("This wizard will help you export QuickBooks P&L data into the Popeyes"
-                         " provided P&L workbook.")
+                         f" provided P&L workbook.\n\nv{__version__}")
 
 
 class WorkbookPage(QWizardPage):
@@ -355,7 +360,8 @@ class ConvertPage(QWizardPage):
         self.pbar.setMaximum(sheets)
         self.pbar.show()
 
-        thread = Worker(srcpath, dstpath, mapfile, sheet_map_src2dst, self)
+        thread = ConverterThread(
+            srcpath, dstpath, mapfile, sheet_map_src2dst, self)
         thread.completedSheet.connect(self.oneSheetDone)
         thread.resultReady.connect(self.conversionComplete)
         thread.start()
