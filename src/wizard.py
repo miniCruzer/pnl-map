@@ -39,7 +39,7 @@ from .libexcel import (workbook_close, workbook_list_sheets, workbook_load,
                        worksheet_set_number_format)
 from .mapper import parse_map, search_map
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __author__ = "Samuel Hoffman"
 
 # pylint: disable=C0103
