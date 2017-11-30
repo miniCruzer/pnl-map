@@ -1,4 +1,23 @@
-"""pywin32 Excel wrappers that are less ugly and cumbersome"""
+"""
+pywin32 Excel wrappers that are less ugly and cumbersome
+
+>>> import os
+>>>
+>>> wb = workbook_load(os.path.abspath("testdata/Test.xlsx"))
+>>>
+>>> list(workbook_list_sheets(wb))
+['Jan 17', 'Feb 17', 'Mar 17', 'Apr 17', 'May 17', 'Jun 17', 'Jul 17', 'Aug 17', 'Sep 17', 'Oct 17']
+>>>
+>>> sheet = worksheet_load(wb, "Jan 17")
+>>> worksheet_cell_get(sheet, "B", 2)
+'Ordinary Income/Expense'
+>>> worksheet_cell_set(sheet, "Z", 1, "ok")
+>>> worksheet_cell_get(sheet, "Z", 1)
+'ok'
+>>>
+>>> workbook_close(wb)
+
+"""
 
 from typing import (Any, Dict, Generator,  # pylint: disable=unused-import
                     Iterable, Tuple)
@@ -7,7 +26,7 @@ import win32com.client as win32
 
 
 def workbook_load(path: str, visible=True):
-    """ load an excel workbook """
+    """ load an excel workbook"""
     excel = win32.dynamic.Dispatch("Excel.Application")
     excel.Visible = visible
     excel.DisplayAlerts = False
@@ -88,3 +107,8 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict,
         yield (row, values)
 
         row += 1
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
