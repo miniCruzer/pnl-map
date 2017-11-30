@@ -14,7 +14,7 @@ class MapError(Exception):
 
 def parse_map(text: List[str]) -> Dict[str, Tuple[str, str]]:
     """ parse a map file """
-    map_regex = re.compile("^(.*) = ([^ ]+): (.*)$")
+    map_regex = re.compile(r"^(.*) = ([^ ]+): (.*)$")
 
     sheetmap = {}
 
@@ -25,7 +25,7 @@ def parse_map(text: List[str]) -> Dict[str, Tuple[str, str]]:
         res = map_regex.search(line)
 
         if not res:
-            raise MapError("could not match line %s: %s" % ((num + 1), line))
+            raise MapError(f"could not match line {num + 1}: {line}")
 
         dst = res.group(1)
         method = res.group(2).strip()

@@ -1,12 +1,4 @@
-"""
-pywin32 Excel wrappers that are less ugly and cumbersome
-"""
-
-#
-# Copyright (c) 2017 Samuel Hoffman
-#
-# sheetcore.py: read and write from sheets
-#
+"""pywin32 Excel wrappers that are less ugly and cumbersome"""
 
 from typing import (Any, Dict, Generator,  # pylint: disable=unused-import
                     Iterable, Tuple)
@@ -27,7 +19,7 @@ def workbook_close(workb):
     workb.Close()
 
 
-def workbook_list_sheets(workbk):
+def workbook_list_sheets(workbk) -> Generator[str, None, None]:
     """ yield a list of all worksheet names in a workbook object """
     for sheet in workbk.Sheets:
         yield sheet.Name

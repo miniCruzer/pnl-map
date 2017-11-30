@@ -32,15 +32,20 @@ DST_COL = 1
 SRC_COL = 0
 
 # XXX: columns and stop columns should not be hardcoded
-SRC_COLUMNS = ('C', 'D', 'E', 'F', 'G', 'H')
-SRC_STOP = {"C": None, "D": None, "E": None, "F": None, "G": None, "H": None}
-DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')
+SRC_COLUMNS = ('C', 'D', 'E', 'F', 'G', 'H') # TODO: QListWidget
+SRC_STOP = {"C": None, "D": None, "E": None, "F": None, "G": None, "H": None} # TODO: QTableWidget
+DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K') # TODO: QListWIdget
 DST_STOP = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None,
-            'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None}
+            'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None} # TODO: QTableWidget
 
 
 class SheetLoaderThread(QThread):
-    """ load spreadsheets' sheet names in a separate thread """
+    """load spreadsheets' sheet names in a separate thread
+
+    signals:
+        emits resultReady with a single list argument, which is a matrix for a QTableWidget of rows
+        and columns.
+    """
     resultReady = pyqtSignal(list)
 
     def __init__(self, srcbkpath: str, dstbkpath: str, table: QTableWidget, parent=None) -> None:
@@ -72,7 +77,14 @@ class SheetLoaderThread(QThread):
 
 class ConverterThread(QThread):
 
-    """ separate thread for working with Excel """
+    """ separate thread for working with Excel.
+
+    signals:
+        resultReady - emitted when all worksheets have been converted
+        completedSheet - emitted after each worksheet has been converted with the name of the sheet
+        of the destination workbook
+
+    """
 
     resultReady = pyqtSignal()
     completedSheet = pyqtSignal(str)
@@ -201,7 +213,6 @@ class WorkbookPage(QWizardPage):
         self.setCommitPage(True)
         self.setButtonText(QWizard.CommitButton, "Load Spreadsheets")
 
-        # source workbook
         self.sourceBookPath = QLineEdit()
         browseSourceBook = QPushButton("Browse ...")
         browseSourceBook.clicked.connect(self.openSrcBook)
@@ -212,7 +223,6 @@ class WorkbookPage(QWizardPage):
 
         self.mainLayout.addRow("Source Workbook", srcLayout)
 
-        # destination workbook
         self.destBookPath = QLineEdit()
         browseDestBook = QPushButton("Browse ...", self)
         browseDestBook.clicked.connect(self.openDstBook)
@@ -407,7 +417,7 @@ class ConvertPage(QWizardPage):
         self.setSubTitle(
             "Conversion completed. The finished spreadsheet is open in Excel.")
         self.pwindow.setPlainText(
-            self.pwindow.toPlainText() + f"Done.")
+            self.pwindow.toPlainText() + "Done.")
 
     def isComplete(self):
         """ called by QWizard to see if all sheets have been converted yet """
