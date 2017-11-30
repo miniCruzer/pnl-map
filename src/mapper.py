@@ -1,7 +1,10 @@
 """ map file instruction parser """
 
 import re
-from typing import Any, Dict, Iterable, Tuple
+from typing import (Any, Callable, Dict,  # pylint: disable=unused-import
+                    Iterable, List, Tuple)
+
+SEARCH_DISPATCH_TABLE = {} # type: Dict[str, Callable]
 
 
 class MapError(Exception):
@@ -9,7 +12,7 @@ class MapError(Exception):
     pass
 
 
-def parse_map(text: str) -> Dict[str, Tuple[str, str]]:
+def parse_map(text: List[str]) -> Dict[str, Tuple[str, str]]:
     """ parse a map file """
     map_regex = re.compile("^(.*) = ([^ ]+): (.*)$")
 
@@ -33,7 +36,7 @@ def parse_map(text: str) -> Dict[str, Tuple[str, str]]:
     return sheetmap
 
 
-def longest(iterable: Iterable[str]) -> int:
+def longest(iterable: Iterable[Tuple]) -> int:
     """ return the longest length item in the iterable """
     length = 0
     for item in iterable:
@@ -42,7 +45,7 @@ def longest(iterable: Iterable[str]) -> int:
     return length
 
 
-def search_map(data_dict: dict, method: str, term: str) -> Any:
+def search_map(data_dict: Dict[str, Tuple], method: str, term: str) -> Any:
     """ search mapped data 'data_dict' for a  """
     if method == "set":
         longest_value = longest(data_dict.values())
@@ -60,20 +63,35 @@ def search_map(data_dict: dict, method: str, term: str) -> Any:
 
     for key, value in data_dict.items():
 
-        if method == "starts":
-            if key.startswith(term):
-                return value
-        elif method == "ends":
-            if key.endswith(term):
-                return value
-        elif method == "contains":
-            if key in term:
-                return value
-        elif method == "exact":
-            if key == term:
-                return value
-        elif method == "re":
-            if re.search(term, key):
-                return value
+        if method in SEARCH_DISPATCH_TABLE:
+            retval = SEARCH_DISPATCH_TABLE[method](term, key, value)
+            if retval:
+                return retval
         else:
-            raise ValueError("invalid search method %r" % method)
+            raise ValueError(f"invalid search method {method!r}")
+
+
+def starts_method(term: str, key: str, value: Any) -> str:
+    """ Map file search method 'starts' will return value if key starts with the search term """
+    return value if key.startswith(term) else ""
+
+def ends_method(term: str, key: str, value: Any) -> str:
+    """ Map file search method 'ends' will return value if key ends with the search term """
+    return value if key.endswith(term) else ""
+
+def contains_method(term: str, key: str, value: Any) -> str:
+    """ Map file search method 'contains' will return 'value' if 'key' contains 'term' """
+    return value if key in term else ""
+
+def exact_method(term: str, key: str, value: Any) -> str:
+    """ Map file search method 'exact' will return 'value' if 'key' == 'term' """
+    return value if key == term else ""
+
+def regex_method(term: str, key: str, value: Any) -> str:
+    """ Map file search method 'regex' will return 'value' if regex pattern 'term' matches 'key' """
+    return value if re.search(term, key) else ""
+
+SEARCH_DISPATCH_TABLE["starts"] = starts_method
+SEARCH_DISPATCH_TABLE["ends"] = ends_method
+SEARCH_DISPATCH_TABLE["contains"] = contains_method
+SEARCH_DISPATCH_TABLE["exact"] = exact_method

@@ -8,7 +8,8 @@ pywin32 Excel wrappers that are less ugly and cumbersome
 # sheetcore.py: read and write from sheets
 #
 
-from typing import Any, Dict, Iterable  # pylint: disable=unused-import
+from typing import (Any, Dict, Generator,  # pylint: disable=unused-import
+                    Iterable, Tuple)
 
 import win32com.client as win32
 
@@ -61,9 +62,9 @@ def worksheet_cell_set_raw(worksh, column: str, row: int, value: Any) -> None:
     worksh.Range(cell).Value2 = value
 
 
-def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, consecutive=3):
+def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict,
+                   consecutive=3) -> Generator[Tuple[int, Dict[str, Any]], None, None]:
     """ iterate rows of a worksheet, yielding values of cells from each row.
-
     worksh - worksheet object to iterate
     start_row - row number >=1 to begin iterating
     get_columns - tuple of columns to retrieve values of
@@ -72,7 +73,7 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, cons
     """
 
     if start_row < 1:
-        raise ValueError("must start at row 1 or higher")
+        raise ValueError("must start at row >=1")
 
     row = start_row
     matches = 0
@@ -92,6 +93,6 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict, cons
         else:
             matches = 0
 
-        yield row, values
+        yield (row, values)
 
         row += 1

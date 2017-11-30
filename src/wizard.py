@@ -3,6 +3,7 @@ QWizard for running through a full export from QuickBooks formatted data into th
 spreadsheet.
 """
 import os
+from typing import Dict, Tuple  # pylint: disable=unused-import
 
 import pythoncom
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -42,14 +43,14 @@ class SheetLoaderThread(QThread):
     """ load spreadsheets' sheet names in a separate thread """
     resultReady = pyqtSignal(list)
 
-    def __init__(self, srcbkpath, dstbkpath, table, parent=None):
+    def __init__(self, srcbkpath: str, dstbkpath: str, table: QTableWidget, parent=None) -> None:
         super(SheetLoaderThread, self).__init__(parent)
 
         self.srcbkpath = srcbkpath
         self.dstbkpath = dstbkpath
         self.table = table
 
-    def run(self):
+    def run(self) -> None:
         """ prepare all spreadsheet names from the source sheet and the destination sheet and
         prepare them into matrix of rows """
 
@@ -76,17 +77,17 @@ class ConverterThread(QThread):
     resultReady = pyqtSignal()
     completedSheet = pyqtSignal(str)
 
-    def __init__(self, options: dict, sheet_map_src2dst: dict, parent=None) -> None:
+    def __init__(self, options: dict, sheet_map: dict, parent=None) -> None:
         super(ConverterThread, self).__init__(parent)
 
         self.srcbkpath = options["source-book"]
         self.dstbkpath = options["dest-book"]
         self.mapfile = options["map-file"]
-        self.sheet_map_src2dst = sheet_map_src2dst
+        self.sheet_map = sheet_map
 
-    def run(self):
+    def run(self) -> None:
         """ convert spreadsheet data """
-        map_dict = {}
+        map_dict = {}  # type: Dict[str, Tuple[str, str]]
         pythoncom.CoInitialize()  # pylint: disable=E1101
         srcbk = workbook_load(self.srcbkpath)
         dstbk = workbook_load(self.dstbkpath)
@@ -94,17 +95,18 @@ class ConverterThread(QThread):
         with open(self.mapfile) as fhandle:
             map_dict = parse_map(fhandle.readlines())
 
-        for srcshname, dstshname in self.sheet_map_src2dst.items():
+        # TODO: refactor all these loops entirely into their own functions
+        for srcshname, dstshname in self.sheet_map.items():
 
             srcsh = worksheet_load(srcbk, srcshname)
             dstsh = worksheet_load(dstbk, dstshname)
 
-            source_data = {}
+            source_data = {} # type: Dict[str, Tuple]
 
             for row, data in worksheet_iter(srcsh, 1, SRC_COLUMNS, SRC_STOP):
 
                 key = data["E"] or data["D"] or data["C"] or str(row)
-                values = data["F"], data["G"], data["H"]
+                values = (data["F"], data["G"], data["H"])
 
                 if any(values):
                     source_data[key] = values
@@ -129,6 +131,7 @@ class ConverterThread(QThread):
                 method, term = map_dict[keyword]
 
                 # XXX: these should not be hardcoded
+
                 values = search_map(source_data, method, term)
                 if not values:
                     worksheet_cell_set_raw(dstsh, "B", row, "0")
@@ -359,7 +362,7 @@ class ConvertPage(QWizardPage):
     def initializePage(self):
         """ load the sheet map from the SheetMapPage, setup a progress bar, and start the
         ConverterThread """
-        sheet_map_src2dst = {}
+        sheet_map_src2dst = {}  # type: Dict
         table = self.wizard().table
 
         srcpath = self.field(SOURCE_FIELD_NAME)
@@ -380,7 +383,7 @@ class ConvertPage(QWizardPage):
         options = {
             "source-book": srcpath,
             "dest-book": dstpath,
-            "mapfile": mapfile
+            "map-file": mapfile
         }
 
         thread = ConverterThread(options, sheet_map_src2dst, self)
@@ -418,8 +421,8 @@ class Wizard(QWizard):
     def __init__(self, parent=None):
         super(Wizard, self).__init__(parent=parent)
 
-        self.table = None
-        self.mapFileBx = None
+        self.table = None  # type: QTableWidget
+        self.mapFileBx = None  # type: QComboBox
         self.srcbk = None
         self.dstbk = None
 
