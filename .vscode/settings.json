@@ -3,5 +3,6 @@
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
     "files.trimTrailingWhitespace": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "python.autoComplete.addBrackets": false
 }
