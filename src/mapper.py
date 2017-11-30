@@ -1,6 +1,7 @@
 """ map file instruction parser """
 
 import re
+from typing import Any, Dict, Iterable, Tuple
 
 
 class MapError(Exception):
@@ -8,7 +9,7 @@ class MapError(Exception):
     pass
 
 
-def parse_map(text):
+def parse_map(text: str) -> Dict[str, Tuple[str, str]]:
     """ parse a map file """
     map_regex = re.compile("^(.*) = ([^ ]+): (.*)$")
 
@@ -32,7 +33,7 @@ def parse_map(text):
     return sheetmap
 
 
-def longest(iterable) -> int:
+def longest(iterable: Iterable[str]) -> int:
     """ return the longest length item in the iterable """
     length = 0
     for item in iterable:
@@ -41,7 +42,7 @@ def longest(iterable) -> int:
     return length
 
 
-def search_map(data_dict: dict, method: str, term: str):
+def search_map(data_dict: dict, method: str, term: str) -> Any:
     """ search mapped data 'data_dict' for a  """
     if method == "set":
         longest_value = longest(data_dict.values())
