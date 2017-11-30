@@ -26,7 +26,6 @@ EXCEL_FILE_FILTER = "Excel (*.xlsx *.xlsm)"
 
 SOURCE_FIELD_NAME = "QuickBooks Workbook"
 DESTINATION_FIELD_NAME = "Popeyes P&L Workbook"
-MAP_FIELD_NAME = "Map File"
 
 DST_COL = 1
 SRC_COL = 0
@@ -77,12 +76,12 @@ class ConverterThread(QThread):
     resultReady = pyqtSignal()
     completedSheet = pyqtSignal(str)
 
-    def __init__(self, srcbk, dstbk, mapfile, sheet_map_src2dst, parent=None):
+    def __init__(self, options: dict, sheet_map_src2dst: dict, parent=None) -> None:
         super(ConverterThread, self).__init__(parent)
 
-        self.srcbkpath = srcbk
-        self.dstbkpath = dstbk
-        self.mapfile = mapfile
+        self.srcbkpath = options["source-book"]
+        self.dstbkpath = options["dest-book"]
+        self.mapfile = options["map-file"]
         self.sheet_map_src2dst = sheet_map_src2dst
 
     def run(self):
@@ -201,23 +200,23 @@ class WorkbookPage(QWizardPage):
 
         # source workbook
         self.sourceBookPath = QLineEdit()
-        self.browseSourceBook = QPushButton("Browse ...")
-        self.browseSourceBook.clicked.connect(self.openSrcBook)
+        browseSourceBook = QPushButton("Browse ...")
+        browseSourceBook.clicked.connect(self.openSrcBook)
 
         srcLayout = QHBoxLayout()
         srcLayout.addWidget(self.sourceBookPath)
-        srcLayout.addWidget(self.browseSourceBook)
+        srcLayout.addWidget(browseSourceBook)
 
         self.mainLayout.addRow("Source Workbook", srcLayout)
 
         # destination workbook
         self.destBookPath = QLineEdit()
-        self.browseDestBook = QPushButton("Browse ...", self)
-        self.browseDestBook.clicked.connect(self.openDstBook)
+        browseDestBook = QPushButton("Browse ...", self)
+        browseDestBook.clicked.connect(self.openDstBook)
 
         dstLayout = QHBoxLayout()
         dstLayout.addWidget(self.destBookPath)
-        dstLayout.addWidget(self.browseDestBook)
+        dstLayout.addWidget(browseDestBook)
 
         self.mainLayout.addRow("Destination Workbook", dstLayout)
 
@@ -378,8 +377,13 @@ class ConvertPage(QWizardPage):
         self.pbar.setMaximum(sheets)
         self.pbar.show()
 
-        thread = ConverterThread(
-            srcpath, dstpath, mapfile, sheet_map_src2dst, self)
+        options = {
+            "source-book": srcpath,
+            "dest-book": dstpath,
+            "mapfile": mapfile
+        }
+
+        thread = ConverterThread(options, sheet_map_src2dst, self)
         thread.completedSheet.connect(self.oneSheetDone)
         thread.resultReady.connect(self.conversionComplete)
         thread.start()
