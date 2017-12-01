@@ -6,20 +6,63 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>600</width>
     <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Popeyes P&amp;L Mapper</string>
+   <string>Popeyes P&amp;L Converter</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QCommandLinkButton" name="wizardCmd">
+      <property name="text">
+       <string>Conversion wizard</string>
+      </property>
+      <property name="description">
+       <string>Convert a QuickBooks export to the Popeyes format.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCommandLinkButton" name="mapEditCmd">
+      <property name="text">
+       <string>Map files</string>
+      </property>
+      <property name="description">
+       <string>Create and edit company map files.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCommandLinkButton" name="templateCmd">
+      <property name="text">
+       <string>Spreadsheet templates</string>
+      </property>
+      <property name="description">
+       <string>Set up templates.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCommandLinkButton" name="quitCmd">
+      <property name="text">
+       <string>Quit</string>
+      </property>
+      <property name="description">
+       <string>Exit program.</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>600</width>
      <height>21</height>
     </rect>
    </property>
@@ -27,5 +70,22 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>quitCmd</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>488</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>0</x>
+     <y>566</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

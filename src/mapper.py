@@ -1,10 +1,13 @@
 """ map file instruction parser """
 
+import os
 import re
 from typing import (Any, Callable, Dict,  # pylint: disable=unused-import
                     Iterable, List, Tuple)
 
-from PyQt5.QtWidgets import QDialog, QFileDialog, QTableWidgetItem, QMessageBox, QComboBox
+from PyQt5.QtWidgets import (QComboBox, QDialog, QFileDialog, QMessageBox,
+                             QTableWidgetItem)
+
 from .ui.mapeditor import Ui_MapEditor
 
 SEARCH_DISPATCH_TABLE = {}  # type: Dict[str, Callable]
@@ -71,6 +74,16 @@ def search_map(data_dict: Dict[str, Tuple], method: str, term: str) -> Any:
     True
     >>> search_map(data, "exact", "5109 · Salaries Managers") == managers
     True
+    >>> search_map(data, "set", "0")
+    ('0', '0', '0')
+    >>> search_map(data, "each", "1,2,3")
+    ['1', '2', '3']
+    >>> search_map(data, "re", "^5109") == managers
+    True
+    >>> search_map(data, "fail", "5109")
+    Traceback (most recent call last):
+    ...
+    MapError: invalid search method 'fail'
     """
     if method == "set":
         longest_value = longest(data_dict.values())
@@ -93,7 +106,7 @@ def search_map(data_dict: Dict[str, Tuple], method: str, term: str) -> Any:
             if retval:
                 return retval
         else:
-            raise ValueError(f"invalid search method {method!r}")
+            raise MapError(f"invalid search method {method!r}")
 
 
 def starts_method(term: str, key: str, value: Any) -> str:
@@ -151,11 +164,17 @@ def regex_method(term: str, key: str, value: Any) -> str:
     return value if re.search(term, key) else ""
 
 
+def ignore(term):
+    return term
+
+
 SEARCH_DISPATCH_TABLE["starts"] = starts_method
 SEARCH_DISPATCH_TABLE["ends"] = ends_method
 SEARCH_DISPATCH_TABLE["contains"] = contains_method
 SEARCH_DISPATCH_TABLE["exact"] = exact_method
-
+SEARCH_DISPATCH_TABLE["re"] = regex_method
+SEARCH_DISPATCH_TABLE["set"] = ignore
+SEARCH_DISPATCH_TABLE["each"] = ignore
 # pylint: disable=C0103
 
 
@@ -175,32 +194,48 @@ class MapEditor(Ui_MapEditor, QDialog):
         self.saveMapButton.clicked.connect(self.saveMap)
         self.saveAsButton.clicked.connect(self.saveMapAs)
         self.newMapButton.clicked.connect(self.newMap)
-        self.newRowButton.clicked.connect(self.newRow)
+        self.addRowButton.clicked.connect(self.newRow)
         self.delRowButton.clicked.connect(self.delRow)
+        self.rowFilterLineEdit.textEdited.connect(self.filterRows)
+        self.filterRegex.stateChanged.connect(self.filterChanged)
 
         self.dirty = False
         self.current = None
+        self.defaultTitle = self.windowTitle()
 
     # signals
 
     def openMap(self):
         """ open map file """
+        self.dirtyCheck()
+
         path = QFileDialog.getOpenFileName(
             self, "Open Map File", "", "Text Documents (*.txt)")
 
-        if path:
-            self.loadMap(parse_map(path[0]))
+        if path[0]:
+
+            mapfh = open(path[0], 'r')
+            data = mapfh.readlines()
+            mapfh.close()
+
+            self.loadMap(parse_map(data))
+
+            self.setWindowTitle(
+                f"{self.defaultTitle} - {os.path.basename(path[0])}")
 
     def saveMapAs(self):
         """ save map to a specific file """
         path = QFileDialog.getSaveFileName(
-            self, "Save Map File", "maps", "Text Documnets (*.txt)")
+            self, "Save Map File", "maps", "Text Documents (*.txt)")
 
-        if not path:
+        if not path[0]:
             return
 
         self.dumpMap(path[0])
         self.current = path[0]
+        self.setWindowTitle(
+            f"{self.defaultTitle} - {os.path.basename(self.current)}")
+        self.dirty = False
 
     def saveMap(self):
         """ dump map table to the disk """
@@ -208,21 +243,23 @@ class MapEditor(Ui_MapEditor, QDialog):
             self.saveMapAs()
         else:
             self.dumpMap(self.current)
+            self.dirty = False
 
     def newMap(self):
         """ create a new map file """
-        if self.dirty:
-            ans = QMessageBox.question(self,
-                                       "Save changes?",
-                                       "Would you like to save changes the current map file?")
-            if ans:
-                self.saveMap()
+        self.dirtyCheck()
+        self.mapTable.clearContents()
+        self.mapTable.setRowCount(0)
+        self.dirty = False
+        self.current = None
+        self.setWindowTitle(self.defaultTitle)
 
     def newRow(self):
         """ add a row to the map table """
         self.dirty = True
 
         rows = self.mapTable.rowCount() + 1
+
         self.mapTable.setRowCount(rows)
 
         name = QTableWidgetItem()
@@ -238,6 +275,43 @@ class MapEditor(Ui_MapEditor, QDialog):
         """ delete the current selected row from the map table """
         self.dirty = True
 
+        remove = set()
+
+        for item in self.mapTable.selectedItems():
+            remove.add(item.row())
+
+        for row in remove:
+            self.mapTable.removeRow(row)
+
+    def filterChanged(self, state):
+        """regex filter was toggled, re-run filter"""
+        self.filterRows(self.rowFilterLineEdit.text())
+
+    def filterRows(self, text):
+        """loop through all rows, and see if "text" matches the row name by regex or contains"""
+
+        for row in range(self.mapTable.rowCount()):
+
+            hide = False
+
+            if self.filterRegex.isChecked():
+                if re.search(text, self.mapTable.item(row, NAME_COL).text()):
+                    hide = False
+                else:
+                    hide = True
+
+            else:
+                if text.casefold() in self.mapTable.item(row, NAME_COL).text().casefold():
+                    hide = False
+                else:
+                    hide = True
+
+            self.mapTable.setRowHidden(row, hide)
+
+    def makeDirty(self):
+        """ make the table dirty """
+        self.dirty = True
+
     # methods
 
     def loadMap(self, map_dict: MapDict):
@@ -248,11 +322,18 @@ class MapEditor(Ui_MapEditor, QDialog):
         for row, (key, (method, search_term)) in enumerate(map_dict.items()):
 
             name = QTableWidgetItem(key)
-            meth = QTableWidgetItem(method)
             term = QTableWidgetItem(search_term)
 
+            methbox = QComboBox()
+            methbox.addItems(SEARCH_DISPATCH_TABLE.keys())
+
+            if method in SEARCH_DISPATCH_TABLE:
+                methbox.setCurrentText(method)
+
+            methbox.currentIndexChanged.connect(self.makeDirty)
+
             self.mapTable.setItem(row, NAME_COL, name)
-            self.mapTable.setItem(row, METH_COL, meth)
+            self.mapTable.setCellWidget(row, METH_COL, methbox)
             self.mapTable.setItem(row, TERM_COL, term)
 
     def dumpMap(self, path):
@@ -261,13 +342,24 @@ class MapEditor(Ui_MapEditor, QDialog):
         mapfh = open(path, 'w')
 
         for row in range(self.mapTable.rowCount()):
-            name = self.mapTable.item(row, NAME_COL)
-            meth = self.mapTable.item(row, METH_COL)
-            term = self.mapTable.item(row, TERM_COL)
+            name = self.mapTable.item(row, NAME_COL).text()
+            meth = self.mapTable.cellWidget(row, METH_COL).currentText()
+            term = self.mapTable.item(row, TERM_COL).text()
 
             mapfh.write(f"{name} = {meth}: {term}\r\n")
 
         mapfh.close()
+
+    def dirtyCheck(self):
+        """Check if changes have been made to the current open table, and prompt user to save
+        changes before proceeding with the next action."""
+
+        if self.dirty:
+            ans = QMessageBox.question(self,
+                                       "Save changes?",
+                                       "Would you like to save changes the current map file?")
+            if ans == QMessageBox.Yes:
+                self.saveMap()
 
 
 if __name__ == '__main__':
