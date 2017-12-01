@@ -5,10 +5,15 @@ import re
 from typing import (Any, Callable, Dict,  # pylint: disable=unused-import
                     Iterable, List, Tuple)
 
-from PyQt5.QtWidgets import (QComboBox, QDialog, QFileDialog, QMessageBox,
-                             QTableWidgetItem)
+import pythoncom
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import (QComboBox, QDialog, QFileDialog, QInputDialog,
+                             QMessageBox, QTableWidgetItem)
 
-from .ui.mapeditor import Ui_MapEditor
+from .libexcel import (ExcelThread, workbook_close, workbook_load,
+                       worksheet_iter, worksheet_load)
+
+from .ui import Ui_MapEditor, Ui_PreloadRows
 
 SEARCH_DISPATCH_TABLE = {}  # type: Dict[str, Callable]
 
@@ -183,6 +188,15 @@ METH_COL = 1
 TERM_COL = 2
 
 
+class PreloadRowsDialog(Ui_PreloadRows, QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+
+    def setSheets(self, sheets):
+        self.sheetNamesComboBox.addItems(sheets)
+
+
 class MapEditor(Ui_MapEditor, QDialog):
     """ QDialog for map file editing """
 
@@ -198,10 +212,13 @@ class MapEditor(Ui_MapEditor, QDialog):
         self.delRowButton.clicked.connect(self.delRow)
         self.rowFilterLineEdit.textEdited.connect(self.filterRows)
         self.filterRegex.stateChanged.connect(self.filterChanged)
+        self.preloadRowsButton.clicked.connect(self.preloadRowNames)
 
         self.dirty = False
         self.current = None
         self.defaultTitle = self.windowTitle()
+        self.preloadThread = None
+        self.preloadedRows = []
 
     # signals
 
@@ -210,7 +227,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         self.dirtyCheck()
 
         path = QFileDialog.getOpenFileName(
-            self, "Open Map File", "", "Text Documents (*.txt)")
+            self, "Open Map File", "maps", "Text Documents (*.txt)")
 
         if path[0]:
 
@@ -262,14 +279,13 @@ class MapEditor(Ui_MapEditor, QDialog):
 
         self.mapTable.setRowCount(rows)
 
-        name = QTableWidgetItem()
         meths = QComboBox()
         meths.addItems(SEARCH_DISPATCH_TABLE.keys())
-        term = QTableWidgetItem()
+        meths.currentIndexChanged.connect(self.makeDirty)
 
-        self.mapTable.setItem(rows - 1, NAME_COL, name)
+        self.mapTable.setCellWidget(rows - 1, NAME_COL, self.makePreloadBox())
         self.mapTable.setCellWidget(rows - 1, METH_COL, meths)
-        self.mapTable.setItem(rows - 1, TERM_COL, term)
+        self.mapTable.setItem(rows - 1, TERM_COL, QTableWidgetItem())
 
     def delRow(self):
         """ delete the current selected row from the map table """
@@ -308,6 +324,62 @@ class MapEditor(Ui_MapEditor, QDialog):
 
             self.mapTable.setRowHidden(row, hide)
 
+    def preloadRowNames(self):
+
+        name = QFileDialog.getOpenFileName(
+            self, "Open Excel Spreadsheet", "", "Excel (*.xlsx)")
+
+        if name[0]:
+
+            self.preloadDialog = PreloadRowsDialog(self)
+            self.preloadDialog.accepted.connect(self.preloadStart)
+            self.preloadDialog.rejected.connect(self.preloadCancel)
+
+            self.preloadThread = ExcelThread(os.path.normpath(name[0]), self)
+            self.preloadThread.finished.connect(self.resetThread)
+            self.preloadThread.sheetNamesReady.connect(
+                self.preloadDialog.setSheets)
+            self.preloadThread.rowsReady.connect(self.preloadRowsDone)
+
+            self.preloadThread.start()
+            self.preloadDialog.exec_()
+
+    def preloadStart(self):
+        """ recieved requested sheet name and column from the user, request values from preloader
+        thread """
+        sheet = self.preloadDialog.sheetNamesComboBox.currentText()
+        column = (self.preloadDialog.columnLineEdit.text(),)
+
+        self.preloadThread.get(sheet, column)
+
+    def preloadCancel(self):
+        """ cancel preload thread """
+        self.preloadThread.shutdown = True
+
+    def preloadRowsDone(self, sheet, rows):
+        """ called from the preloader thread when all the cells requested were retrieved """
+        self.preloadThread.shutdown = True
+
+        self.preloadedRows.clear()
+        for num in rows.values():
+            for column in num.values():
+                if column:
+                    self.preloadedRows.append(column)
+
+        for row in range(self.mapTable.rowCount()):
+
+            box = QComboBox()
+            box.currentIndexChanged.connect(self.makeDirty)
+            box.setEditable(True)
+            box.addItems(self.preloadedRows)
+            box.setCurrentText(self.mapTable.item(row, NAME_COL).text())
+
+            self.mapTable.setCellWidget(row, NAME_COL, box)
+
+    def resetThread(self):
+        """ called when the preloader thread exits for cleanup """
+        self.preloadThread = None
+
     def makeDirty(self):
         """ make the table dirty """
         self.dirty = True
@@ -321,9 +393,6 @@ class MapEditor(Ui_MapEditor, QDialog):
 
         for row, (key, (method, search_term)) in enumerate(map_dict.items()):
 
-            name = QTableWidgetItem(key)
-            term = QTableWidgetItem(search_term)
-
             methbox = QComboBox()
             methbox.addItems(SEARCH_DISPATCH_TABLE.keys())
 
@@ -332,9 +401,12 @@ class MapEditor(Ui_MapEditor, QDialog):
 
             methbox.currentIndexChanged.connect(self.makeDirty)
 
-            self.mapTable.setItem(row, NAME_COL, name)
+            box = self.makePreloadBox()
+            box.setCurrentText(key)
+
+            self.mapTable.setCellWidget(row, NAME_COL, box)
             self.mapTable.setCellWidget(row, METH_COL, methbox)
-            self.mapTable.setItem(row, TERM_COL, term)
+            self.mapTable.setItem(row, TERM_COL, QTableWidgetItem(search_term))
 
     def dumpMap(self, path):
         """ dump current map data to file at 'path' """
@@ -360,6 +432,16 @@ class MapEditor(Ui_MapEditor, QDialog):
                                        "Would you like to save changes the current map file?")
             if ans == QMessageBox.Yes:
                 self.saveMap()
+
+    def makePreloadBox(self):
+        """ return a QComboBox of preloaded rows, if any """
+
+        box = QComboBox()
+        box.setEditable(True)
+        box.addItems(self.preloadedRows)
+        box.currentIndexChanged.connect(self.makeDirty)
+
+        return box
 
 
 if __name__ == '__main__':

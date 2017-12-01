@@ -100,6 +100,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="preloadRowsButton">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load row names from a spreadsheet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Preloads Row Names from an existing Excel spreadsheet into the Row Name column. This helps create more accurate map files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Preload Rows</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

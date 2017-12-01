@@ -4,9 +4,9 @@ import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
-from src.wizard import Wizard
-from src.ui.mainwindow import Ui_MainWindow
 from src.mapper import MapEditor
+from src.wizard import Wizard
+from src.ui import Ui_MainWindow
 
 
 class MainWindow(Ui_MainWindow, QMainWindow):

@@ -23,6 +23,7 @@ from typing import (Any, Dict, Generator,  # pylint: disable=unused-import
                     Iterable, Tuple)
 
 import win32com.client as win32
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 def workbook_load(path: str, visible=True):
@@ -73,15 +74,19 @@ def worksheet_cell_set_raw(worksh, column: str, row: int, value: Any) -> None:
     worksh.Range(cell).Value2 = value
 
 
-def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict,
-                   consecutive=3) -> Generator[Tuple[int, Dict[str, Any]], None, None]:
+def worksheet_iter(worksh, start_row: int, get_columns: tuple, until={},
+                   consecutive=4) -> Generator[Tuple[int, Dict[str, Any]], None, None]:
     """ iterate rows of a worksheet, yielding values of cells from each row.
     worksh - worksheet object to iterate
     start_row - row number >=1 to begin iterating
     get_columns - tuple of columns to retrieve values of
     until - dictionary columns to values - when all columns match these values, iteration will stop
+    if empty, defaults to all None for get_columns
     consecutive - number of consecutive rows that must match 'until' to stop iteration
     """
+
+    if not until:
+        until = {column: None for column in get_columns}
 
     if start_row < 1:
         raise ValueError("must start at row >=1")
@@ -107,6 +112,69 @@ def worksheet_iter(worksh, start_row: int, get_columns: tuple, until: dict,
         yield (row, values)
 
         row += 1
+
+
+class ExcelThread(QThread):
+    """ handle an excel spreadsheet in a thread """
+
+    sheetOpened = pyqtSignal(str)
+    rowsReady = pyqtSignal(str, dict)
+    sheetNamesReady = pyqtSignal(list)
+
+    def __init__(self, path, parent=None):
+        super().__init__(parent)
+
+        self.shutdown = False
+        self.path = path
+        self.pending_sheets = []
+        self.pending_get = {}
+        self.loaded_sheets = {}
+
+        self.workbook = None
+
+    def run(self):
+        """ infinite loop in a thread that waits for insructions fro the main thread """
+        self.workbook = workbook_load(self.path)
+        self.sheetNamesReady.emit(list(workbook_list_sheets(self.workbook)))
+
+        while True:
+
+            if self.shutdown:
+                break
+
+            if self.pending_sheets:
+                self._load_pending_sheets()
+
+            if self.pending_get:
+                self._process_pending_get()
+
+            self.sleep(1)
+
+        workbook_close(self.workbook)
+
+    def _load_pending_sheets(self):
+        for sheet in self.pending_sheets:
+            self.loaded_sheets[sheet] = worksheet_load(
+                self.workbook, sheet)
+        self.pending_sheets = []
+
+    def _process_pending_get(self):
+
+        for sheet, columns in self.pending_get.items():
+
+            if sheet not in self.loaded_sheets:
+                self.loaded_sheets[sheet] = worksheet_load(
+                    self.workbook, sheet)
+
+            cells = {row: data for row, data in worksheet_iter(
+                self.loaded_sheets[sheet], 1, columns, {column: None for column in columns})}
+
+            self.rowsReady.emit(sheet, cells)
+
+        self.pending_get = {}
+
+    def get(self, sheet, columns):
+        self.pending_get[sheet] = columns
 
 
 if __name__ == '__main__':
