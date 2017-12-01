@@ -5,13 +5,10 @@ import re
 from typing import (Any, Callable, Dict,  # pylint: disable=unused-import
                     Iterable, List, Tuple)
 
-import pythoncom
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import (QComboBox, QDialog, QFileDialog, QInputDialog,
+from PyQt5.QtWidgets import (QComboBox, QDialog, QFileDialog,
                              QMessageBox, QTableWidgetItem)
 
-from .libexcel import (ExcelThread, workbook_close, workbook_load,
-                       worksheet_iter, worksheet_load)
+from .libexcel import ExcelThread
 
 from .ui import Ui_MapEditor, Ui_PreloadRows
 
@@ -170,6 +167,7 @@ def regex_method(term: str, key: str, value: Any) -> str:
 
 
 def ignore(term):
+    """ placeholder for a search method """
     return term
 
 
@@ -189,11 +187,14 @@ TERM_COL = 2
 
 
 class PreloadRowsDialog(Ui_PreloadRows, QDialog):
+    """ prompt user to input sheet name from which to load row titles """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
 
     def setSheets(self, sheets):
+        """ set the sheet selection combo box """
         self.sheetNamesComboBox.addItems(sheets)
 
 
@@ -219,6 +220,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         self.defaultTitle = self.windowTitle()
         self.preloadThread = None
         self.preloadedRows = []
+        self.preloadDialog = None
 
     # signals
 
@@ -299,7 +301,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         for row in remove:
             self.mapTable.removeRow(row)
 
-    def filterChanged(self, state):
+    def filterChanged(self, state):  # pylint: disable=unused-argument
         """regex filter was toggled, re-run filter"""
         self.filterRows(self.rowFilterLineEdit.text())
 
@@ -328,7 +330,8 @@ class MapEditor(Ui_MapEditor, QDialog):
             self.mapTable.setRowHidden(row, hide)
 
     def preloadRowNames(self):
-
+        """ used to prime the preloader thread and initialize the PreloadRowsDialog for loading
+        possible row names into the map table's Row Name colum """
         name = QFileDialog.getOpenFileName(
             self, "Open Excel Spreadsheet", "", "Excel (*.xlsx)")
 
@@ -359,7 +362,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         """ cancel preload thread """
         self.preloadThread.shutdown = True
 
-    def preloadRowsDone(self, sheet, rows):
+    def preloadRowsDone(self, sheet, rows):  # pylint: disable=unused-argument
         """ called from the preloader thread when all the cells requested were retrieved """
         self.preloadThread.shutdown = True
 

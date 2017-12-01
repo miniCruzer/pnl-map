@@ -74,7 +74,7 @@ def worksheet_cell_set_raw(worksh, column: str, row: int, value: Any) -> None:
     worksh.Range(cell).Value2 = value
 
 
-def worksheet_iter(worksh, start_row: int, get_columns: tuple, until={},
+def worksheet_iter(worksh, start_row: int, get_columns: tuple, until=None,
                    consecutive=4) -> Generator[Tuple[int, Dict[str, Any]], None, None]:
     """ iterate rows of a worksheet, yielding values of cells from each row.
     worksh - worksheet object to iterate
@@ -174,6 +174,7 @@ class ExcelThread(QThread):
         self.pending_get = {}
 
     def get(self, sheet, columns):
+        """ request values of 'columns' from 'sheet' using worksheet_iter """
         self.pending_get[sheet] = columns
 
 
