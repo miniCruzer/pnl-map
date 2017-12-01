@@ -32,11 +32,13 @@ DST_COL = 1
 SRC_COL = 0
 
 # XXX: columns and stop columns should not be hardcoded
-SRC_COLUMNS = ('C', 'D', 'E', 'F', 'G', 'H') # TODO: QListWidget
-SRC_STOP = {"C": None, "D": None, "E": None, "F": None, "G": None, "H": None} # TODO: QTableWidget
-DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K') # TODO: QListWIdget
+SRC_COLUMNS = ('C', 'D', 'E', 'F', 'G', 'H')  # TODO: QListWidget
+SRC_STOP = {"C": None, "D": None, "E": None, "F": None,
+            "G": None, "H": None}  # TODO: QTableWidget
+DST_COLUMNS = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+               'I', 'J', 'K')  # TODO: QListWIdget
 DST_STOP = {'A': None, 'B': None, 'C': None, 'D': None, 'E': None,
-            'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None} # TODO: QTableWidget
+            'F': None, 'G': None, 'H': None, 'I': None, 'J': None, 'K': None}  # TODO: QTableWidget
 
 
 class SheetLoaderThread(QThread):
@@ -49,7 +51,7 @@ class SheetLoaderThread(QThread):
     resultReady = pyqtSignal(list)
 
     def __init__(self, srcbkpath: str, dstbkpath: str, table: QTableWidget, parent=None) -> None:
-        super(SheetLoaderThread, self).__init__(parent)
+        super().__init__(parent)
 
         self.srcbkpath = srcbkpath
         self.dstbkpath = dstbkpath
@@ -90,7 +92,7 @@ class ConverterThread(QThread):
     completedSheet = pyqtSignal(str)
 
     def __init__(self, options: dict, sheet_map: dict, parent=None) -> None:
-        super(ConverterThread, self).__init__(parent)
+        super().__init__(parent)
 
         self.srcbkpath = options["source-book"]
         self.dstbkpath = options["dest-book"]
@@ -113,7 +115,7 @@ class ConverterThread(QThread):
             srcsh = worksheet_load(srcbk, srcshname)
             dstsh = worksheet_load(dstbk, dstshname)
 
-            source_data = {} # type: Dict[str, Tuple]
+            source_data = {}  # type: Dict[str, Tuple]
 
             for row, data in worksheet_iter(srcsh, 1, SRC_COLUMNS, SRC_STOP):
 
@@ -187,7 +189,7 @@ class IntroPage(QWizardPage):
     """ Simple introduction page for the Wizard. """
 
     def __init__(self, parent=None):
-        super(IntroPage, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setTitle("P&L Wizard")
         self.setSubTitle("This wizard will help you export QuickBooks P&L data into the Popeyes"
@@ -199,7 +201,7 @@ class WorkbookPage(QWizardPage):
     """ Page for selection of source and destination workbooks """
 
     def __init__(self, parent=None):
-        super(WorkbookPage, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setTitle("P&L Wizard - Select Workbooks")
         self.setSubTitle("Use the browse buttons below to select the QuickBooks spreadsheet"
@@ -300,7 +302,7 @@ class SheetMapPage(QWizardPage):
     """ worksheet mapping page """
 
     def __init__(self, parent=None):
-        super(SheetMapPage, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.setTitle("P&L Wizard - Map Worksheets")
         self.setSubTitle("Use the following table to map worksheet names together in the QuickBooks"
@@ -351,7 +353,7 @@ class ConvertPage(QWizardPage):
     """ Wizard page which converts QuickBooks data to Popeyes format """
 
     def __init__(self, parent=None):
-        super(ConvertPage, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setTitle("P&L Wizard - Finished")
         self.setSubTitle(
             "Please wait while the spreadsheets are converted ...")
@@ -415,7 +417,8 @@ class ConvertPage(QWizardPage):
         self.complete = True
         self.completeChanged.emit()
         self.setSubTitle(
-            "Conversion completed. The finished spreadsheet is open in Excel.")
+            "Conversion completed. The finished spreadsheet is open in Excel. <b>CHANGES ARE"
+            " UNSAVED!</b> Review results and save using Excel.")
         self.pwindow.setPlainText(
             self.pwindow.toPlainText() + "Done.")
 
@@ -429,7 +432,7 @@ class Wizard(QWizard):
     """ Base class for the Wizard """
 
     def __init__(self, parent=None):
-        super(Wizard, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         self.table = None  # type: QTableWidget
         self.mapFileBx = None  # type: QComboBox
