@@ -310,14 +310,17 @@ class MapEditor(Ui_MapEditor, QDialog):
 
             hide = False
 
+            cellText = self.mapTable.cellWidget(
+                row, NAME_COL).currentText()
+
             if self.filterRegex.isChecked():
-                if re.search(text, self.mapTable.cellWidget(row, NAME_COL).currentText()):
+                if re.search(text, cellText):
                     hide = False
                 else:
                     hide = True
 
             else:
-                if text.casefold() in self.mapTable.cellWidget(row, NAME_COL).currentText().casefold():
+                if text.casefold() in cellText.casefold():
                     hide = False
                 else:
                     hide = True
