@@ -384,7 +384,8 @@ class MapEditor(Ui_MapEditor, QDialog):
 
     def openMap(self):
         """ open map file """
-        self.dirtyCheck()
+        if not self.dirtyCheck():
+            return
 
         path = QFileDialog.getOpenFileName(
             self, "Open Map File", "maps", "Text Documents (*.txt)")
@@ -410,6 +411,7 @@ class MapEditor(Ui_MapEditor, QDialog):
                 f"{self.defaultTitle} - {os.path.basename(path)}")
 
             self.current = path
+            self.dirty = False
 
     def saveMapAs(self):
         """ save map to a specific file """
@@ -435,7 +437,8 @@ class MapEditor(Ui_MapEditor, QDialog):
 
     def newMap(self):
         """ create a new map file """
-        self.dirtyCheck()
+        if not self.dirtyCheck():
+            return
         self.mapTable.clearContents()
         self.mapTable.setRowCount(0)
         self.current = None
@@ -533,7 +536,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         """ used to prime the preloader thread and initialize the PreloadRowsDialog for loading
         possible row names into the map table's Row Name colum """
         name = QFileDialog.getOpenFileName(
-            self, "Open Excel Spreadsheet", "", "Excel (*.xlsx)")
+            self, "Open Excel Spreadsheet", "templates", "Excel (*.xlsx)")
 
         if name[0]:
 
@@ -676,16 +679,30 @@ class MapEditor(Ui_MapEditor, QDialog):
         mapfh.close()
         shutil.move(tmp, path)
 
-    def dirtyCheck(self):
+    def dirtyCheck(self) -> bool:
         """Check if changes have been made to the current open table, and prompt user to save
-        changes before proceeding with the next action."""
+        changes before proceeding with the next action.
+
+        returns True to proceed and returns False to not proceed
+        """
+
+        logging.debug("entered dirty check", stack_info=True)
 
         if self.dirty:
             ans = QMessageBox.question(self,
                                        "Save changes?",
-                                       "Would you like to save changes the current map file?")
-            if ans == QMessageBox.Yes:
+                                       "Would you like to save changes the current map file?",
+                                       QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
+            if ans == QMessageBox.Save:
+                logging.info("saving changes to map file")
                 self.saveMap()
+                self.dirty = False
+                return True
+            elif ans == QMessageBox.Cancel:
+                logging.info("action canceled at save menu")
+                return False
+            logging.info("changes discarded")
+        return True
 
     def makePreloadBox(self, txt=""):
         """ return a QComboBox of preloaded rows, if any """
