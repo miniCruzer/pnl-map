@@ -455,7 +455,7 @@ class MapEditor(Ui_MapEditor, QDialog):
         if value != self._dirty:
             self._dirty = value
             if value:
-                logging.info("mapfile has been marked dirty")
+                logging.debug("mapfile has been marked dirty", stack_info=True)
                 self.setWindowTitle(self.windowTitle() + "*")
             else:
                 logging.info("mapfile has been marked clean")
@@ -583,9 +583,12 @@ class MapEditor(Ui_MapEditor, QDialog):
         for row in range(self.mapTable.rowCount()):
 
             box = self.mapTable.cellWidget(row, NAME_COL)
+            box.currentIndexChanged.disconnect(self.makeDirty)
+
             txt = box.currentText()
             box.addItems(self.preloadedRows)
             box.setCurrentText(txt)
+            box.currentIndexChanged.connect(self.makeDirty)
 
     def resetThread(self):
         """ called when the preloader thread exits for cleanup """
@@ -684,12 +687,14 @@ class MapEditor(Ui_MapEditor, QDialog):
             if ans == QMessageBox.Yes:
                 self.saveMap()
 
-    def makePreloadBox(self):
+    def makePreloadBox(self, txt=""):
         """ return a QComboBox of preloaded rows, if any """
 
         box = QComboBox()
         box.setEditable(True)
         box.addItems(self.preloadedRows)
+        if txt:
+            box.setCurrentText(txt)
         box.currentIndexChanged.connect(self.makeDirty)
 
         return box
