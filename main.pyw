@@ -1,15 +1,25 @@
 """ main """
 
+import logging
 import sys
 
 from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from src.mapper import MapEditor
-from src.wizard import Wizard
 from src.ui import Ui_MainWindow
+from src.wizard import Wizard
+
+logging.basicConfig(
+    style="{",
+    format="{process: <6} {asctime} {levelname: <9} [line {lineno}] {module}.{funcName}: {message}",
+    filename='log.txt',
+    filemode='w',
+    datefmt='%x %X',
+    level=logging.DEBUG)
 
 
 class MainWindow(Ui_MainWindow, QMainWindow):
+    """mainwindow"""
 
     def __init__(self):
         super().__init__()
