@@ -7,3 +7,6 @@ pyuic5 -o .\src\ui\mainwindow.py ui\mainwindow.ui
 
 echo ** Building PreloadRows
 pyuic5 -o .\src\ui\preload.py ui\preload.ui
+
+echo ** Building MapConfig
+pyuic5 -o .\src\ui\mapconfig.py ui\mapconfig.ui

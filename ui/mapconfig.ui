@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MapConfig</class>
+ <widget class="QDialog" name="MapConfig">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>861</width>
+    <height>394</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Company Map Configuration</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="dialogLayout">
+     <item>
+      <widget class="QGroupBox" name="srcGroupBox">
+       <property name="title">
+        <string>QuickBooks Spreadsheet</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QGroupBox" name="srcKeyGroupBox">
+          <property name="title">
+           <string>Account Columns</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="srcKeyVLayout">
+             <item>
+              <widget class="QListWidget" name="srcKeyList">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Account name column letters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For each row of the QuickBooks export, the converter will search each of the column letters listed here, in order, until a non-empty cell is found. The value found will be matched against the &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt; keyword.&lt;/p&gt;&lt;p&gt;This is usually &lt;span style=&quot; font-weight:600;&quot;&gt;E&lt;/span&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;D&lt;/span&gt;, and &lt;span style=&quot; font-weight:600;&quot;&gt;C&lt;/span&gt;, but depends on the version of QuickBooks used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="srcKeyHLayout">
+               <item>
+                <widget class="QPushButton" name="addSrcKeyButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add account column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="delSrcKeyButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete account column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="sourceDataGroupBox">
+          <property name="title">
+           <string>Restaurant Data Columns</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="srcDataVLayout">
+             <item>
+              <widget class="QListWidget" name="srcDataList">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Store data column letters.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For each row of the QuickBooks export, the converter will record each value of each column listed here, and move the values to the corresponding &lt;span style=&quot; font-weight:600;&quot;&gt;Restaurant Data Columns&lt;/span&gt; under the &lt;span style=&quot; font-weight:600;&quot;&gt;Popeyes P&amp;amp;L Template&lt;/span&gt;. This should have the same number of column letters as &lt;span style=&quot; font-weight:600;&quot;&gt;Restaurant Data Columns&lt;/span&gt; under &lt;span style=&quot; font-weight:600;&quot;&gt;Popeyes P&amp;amp;L&lt;/span&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Template&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;This is usually starts with column &lt;span style=&quot; font-weight:600;&quot;&gt;H&lt;/span&gt;, and each letter until (and excluding) the &lt;span style=&quot; font-weight:600;&quot;&gt;TOTAL&lt;/span&gt; column, but depends on the version of QuickBooks used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="srcDataHLayout">
+               <item>
+                <widget class="QPushButton" name="addSrcDataButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add store column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="delSrcDataButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete store data column.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="dstGroupBox">
+       <property name="title">
+        <string>Popeyes P&amp;&amp;L Template</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QGroupBox" name="dstKeyGroupBox">
+          <property name="title">
+           <string>Account Columns</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="dstKeyVLayout">
+             <item>
+              <widget class="QListWidget" name="dstKeyList">
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For each row of the Popeyes P&amp;amp;L spreadsheet, the converter will search each of the column letters listed here, in order, until a non-empty cell is found. The value found will be considered the &lt;span style=&quot; font-weight:600;&quot;&gt;Row Name&lt;/span&gt; in the map table data.&lt;/p&gt;&lt;p&gt;This is usually column &lt;span style=&quot; font-weight:600;&quot;&gt;A&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="dstKeyHLayout">
+               <item>
+                <widget class="QPushButton" name="addDstKeyButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add account column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="delDstKeyButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete account column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="dstDataGroupBox">
+          <property name="title">
+           <string>Restaurant Data Columns</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="0">
+            <layout class="QVBoxLayout" name="dstDataVLayout">
+             <item>
+              <widget class="QListWidget" name="dstDataList">
+               <property name="whatsThis">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For each row of the Popeyes P&amp;amp;L spreadsheet, the converter will match take the corresponding data found from the QuickBooks export, in order, and place the value in each column listed here. This needs to be the same number of columns as listed in the &lt;span style=&quot; font-weight:600;&quot;&gt;Restaurant Data Columns&lt;/span&gt; under &lt;span style=&quot; font-weight:600;&quot;&gt;QuickBooks Spreadsheet&lt;/span&gt;.&lt;/p&gt;&lt;p&gt;This is usally columns &lt;span style=&quot; font-weight:600;&quot;&gt;B&lt;/span&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;D&lt;/span&gt;, &lt;span style=&quot; font-weight:600;&quot;&gt;F&lt;/span&gt;, and &lt;span style=&quot; font-weight:600;&quot;&gt;H&lt;/span&gt;, but depends on how many restaurants are listed on each spreadsheet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="dragEnabled">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="dstDataHLayout">
+               <item>
+                <widget class="QPushButton" name="addDstDataButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add store column letter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="delDstDataButton">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete store data column.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>-</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="cellFormatLabel">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cell number format to give all data cells. (optional)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Before assigning a number to a restaurant data cell in the Popeyes workbook, the converter will set the cell number to this custom format.&lt;/p&gt;&lt;p&gt;This field is optional.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Cell Format</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="cellFormatLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="fallbackValueLabel">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Value to use if a row could not be found.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the converter cannot find a match for a row on the Popeyes spreadsheet, it will use this value instead.&lt;/p&gt;&lt;p&gt;This is usually just &lt;span style=&quot; font-weight:600;&quot;&gt;0&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Fallback Value</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="fallbackValueLineEdit"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="popeyesTemplateLabel">
+       <property name="text">
+        <string>Popeyes Template</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLineEdit" name="templateLineEdit"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="browseTemplateFile">
+         <property name="text">
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="preloadWorksheetLabel">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Worksheet from which to preload row names.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="whatsThis">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The editor will load row names from this worksheet when the map file is opened for editing.&lt;/p&gt;&lt;p&gt;Usually any labeled month worksheet will work here.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Preload Worksheet</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="preloadWorksheetLineEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <zorder>buttonBox</zorder>
+  <zorder>templateLineEdit</zorder>
+  <zorder>label</zorder>
+  <zorder>browseTemplateFile</zorder>
+  <zorder>formLayoutWidget</zorder>
+  <zorder>templateLineEdit</zorder>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>MapConfig</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>257</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>MapConfig</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>384</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

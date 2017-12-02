@@ -1,3 +1,14 @@
+{
+  "template": "C:\\Users\\minic\\git\\pnl map\\templates\\Monthly PLK P&L Submission.xlsx",
+  "default_sheet": "January",
+  "source_key_columns": "E,D,C",
+  "source_val_columns": "F,G,H",
+  "destination_key_columns": "A",
+  "destination_val_columns": "B,D,F",
+  "number_format": "#,##0.00;-#,##0.00",
+  "fallback_value": "0"
+}
+__DATA__
 Popeyes Restaurant #s = each: 3266,11242,3158
 
 Net Sales = starts: 2999

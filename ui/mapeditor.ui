@@ -6,198 +6,248 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>563</width>
-    <height>621</height>
+    <width>535</width>
+    <height>633</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Company Map Editor</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLineEdit" name="rowFilterLineEdit">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Filter row names.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="placeholderText">
-        <string>Filter row name ...</string>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="filterRegex">
-       <property name="text">
-        <string>Regular Expression</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QTableWidget" name="mapTable">
-     <property name="toolTip">
-      <string>Map table.</string>
+    <widget class="QSplitter" name="splitter">
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-     <property name="whatsThis">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the table which represents a map file for a company conversion. A map file gives the converter wizard instructions on how to move data from the QuickBooks export to the Popeyes spreadsheet.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;Row Name&lt;/span&gt; column represents the title of a row on the Popeyes spreadsheet. The &lt;span style=&quot; font-weight:600;&quot;&gt;Search Method&lt;/span&gt; dropdown box tells the converter how to match the &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt; keyword in the QuickBooks export.&lt;/p&gt;&lt;p&gt;For example, f the &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt; is set to &lt;span style=&quot; font-weight:600;&quot;&gt;starts&lt;/span&gt;, the converter wizard will consider the first that &lt;span style=&quot; font-style:italic;&quot;&gt;starts with&lt;/span&gt; the value in &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt;. &lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;ends&lt;/span&gt; method will match on the first cell that &lt;span style=&quot; font-style:italic;&quot;&gt;ends with&lt;/span&gt; the search term.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;contains&lt;/span&gt; method will match on the first cell which &lt;span style=&quot; font-style:italic;&quot;&gt;contains&lt;/span&gt; the search term (beginning, middle, or end).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;exact&lt;/span&gt; method will match on the first cell which &lt;span style=&quot; font-style:italic;&quot;&gt;exactly&lt;/span&gt; matches the search term (case sensitive).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;re&lt;/span&gt; method will match on the first cell which matches the Regular Expression in the search term (advanced usage).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;set&lt;/span&gt; method will explicitly set the cell to the value in the search term.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;each&lt;/span&gt; method will set each destination cell, in order, with comma separated values in the search term. For example, if there are 3 destination cells, and the search term is set to &amp;quot;A,B,C&amp;quot;, then cell 1 will be A, cell 2 will be B, and cell 3 will be C.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
      </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <attribute name="horizontalHeaderStretchLastSection">
+     <property name="opaqueResize">
       <bool>true</bool>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Row Name</string>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QGroupBox" name="mapTableGroupBox">
+      <property name="title">
+       <string>Map Table</string>
       </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Search Method</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Search Term</string>
-      </property>
-     </column>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QVBoxLayout" name="mapTableLayout">
+         <item>
+          <layout class="QHBoxLayout" name="filterHLayout">
+           <item>
+            <widget class="QLineEdit" name="rowFilterLineEdit">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Filter row names.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="placeholderText">
+              <string>Filter row name ...</string>
+             </property>
+             <property name="clearButtonEnabled">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="filterRegex">
+             <property name="text">
+              <string>Regular Expression</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTableWidget" name="mapTable">
+           <property name="toolTip">
+            <string>Map table.</string>
+           </property>
+           <property name="whatsThis">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This is the table which represents a map file for a company conversion. A map file gives the converter wizard instructions on how to move data from the QuickBooks export to the Popeyes spreadsheet.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;Row Name&lt;/span&gt; column represents the title of a row on the Popeyes spreadsheet. The &lt;span style=&quot; font-weight:600;&quot;&gt;Search Method&lt;/span&gt; dropdown box tells the converter how to match the &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt; keyword in the QuickBooks export. For a QuickBooks export, the search term corresponds to the account names column.&lt;/p&gt;&lt;p&gt;For example, f the &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt; is set to &lt;span style=&quot; font-weight:600;&quot;&gt;starts&lt;/span&gt;, the converter wizard will consider the first that &lt;span style=&quot; font-style:italic;&quot;&gt;starts with&lt;/span&gt; the value in &lt;span style=&quot; font-weight:600;&quot;&gt;Search Term&lt;/span&gt;. &lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;ends&lt;/span&gt; method will match on the first cell that &lt;span style=&quot; font-style:italic;&quot;&gt;ends with&lt;/span&gt; the search term.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;contains&lt;/span&gt; method will match on the first cell which &lt;span style=&quot; font-style:italic;&quot;&gt;contains&lt;/span&gt; the search term (beginning, middle, or end).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;exact&lt;/span&gt; method will match on the first cell which &lt;span style=&quot; font-style:italic;&quot;&gt;exactly&lt;/span&gt; matches the search term (case sensitive).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;re&lt;/span&gt; method will match on the first cell which matches the Regular Expression in the search term (advanced usage).&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;set&lt;/span&gt; method will explicitly set the cell to the value in the search term.&lt;/p&gt;&lt;p&gt;The &lt;span style=&quot; font-weight:600;&quot;&gt;each&lt;/span&gt; method will set each destination cell, in order, with comma separated values in the search term. For example, if there are 3 destination cells, and the search term is set to &amp;quot;A,B,C&amp;quot;, then cell 1 will be A, cell 2 will be B, and cell 3 will be C.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Row Name</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Search Method</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Search Term</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="addDelHLayout">
+           <item>
+            <widget class="QPushButton" name="addRowButton">
+             <property name="toolTip">
+              <string>Add a row to the company map file.</string>
+             </property>
+             <property name="whatsThis">
+              <string>Creates blank row in the table above for a new entry in the company map file.</string>
+             </property>
+             <property name="text">
+              <string>+</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="delRowButton">
+             <property name="toolTip">
+              <string>Delete the currently selected row(s).</string>
+             </property>
+             <property name="whatsThis">
+              <string>Deletes the currently highlighted rows in the table above.</string>
+             </property>
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="addDelHSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="actionVLayout">
+       <item>
+        <widget class="QPushButton" name="newMapButton">
+         <property name="toolTip">
+          <string>Create a new map file.</string>
+         </property>
+         <property name="whatsThis">
+          <string>Resets the above table for a new map file.</string>
+         </property>
+         <property name="text">
+          <string>New</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="openMapButton">
+         <property name="toolTip">
+          <string>Open a map file.</string>
+         </property>
+         <property name="whatsThis">
+          <string>Open an existing map file into the above table for editing.</string>
+         </property>
+         <property name="text">
+          <string>Open</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="saveMapButton">
+         <property name="toolTip">
+          <string>Save map file.</string>
+         </property>
+         <property name="whatsThis">
+          <string>Saves the above table to the hard drive.</string>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="saveAsButton">
+         <property name="toolTip">
+          <string>Save map under a different name.</string>
+         </property>
+         <property name="whatsThis">
+          <string>Saves the curent map file in the table above under a different file name than what's currently open.</string>
+         </property>
+         <property name="text">
+          <string>Save As ...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="quitButton">
+         <property name="text">
+          <string>Close</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="configButton">
+         <property name="text">
+          <string>Configuration</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="preloadRowsButton">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load row names from a spreadsheet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Preloads Row Names from an existing Excel spreadsheet into the Row Name column. This helps create more accurate map files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Preload Rows</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="addRowButton">
-       <property name="toolTip">
-        <string>Add a row to the company map file.</string>
-       </property>
-       <property name="whatsThis">
-        <string>Creates blank row in the table above for a new entry in the company map file.</string>
-       </property>
-       <property name="text">
-        <string>Add Row</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="delRowButton">
-       <property name="toolTip">
-        <string>Delete the currently selected row(s).</string>
-       </property>
-       <property name="whatsThis">
-        <string>Deletes the currently highlighted rows in the table above.</string>
-       </property>
-       <property name="text">
-        <string>Delete Row</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="preloadRowsButton">
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load row names from a spreadsheet.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="whatsThis">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Preloads Row Names from an existing Excel spreadsheet into the Row Name column. This helps create more accurate map files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Preload Rows</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QPushButton" name="saveMapButton">
-       <property name="toolTip">
-        <string>Save map file.</string>
-       </property>
-       <property name="whatsThis">
-        <string>Saves the above table to the hard drive.</string>
-       </property>
-       <property name="text">
-        <string>Save</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="saveAsButton">
-       <property name="toolTip">
-        <string>Save map under a different name.</string>
-       </property>
-       <property name="whatsThis">
-        <string>Saves the curent map file in the table above under a different file name than what's currently open.</string>
-       </property>
-       <property name="text">
-        <string>Save As ...</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="openMapButton">
-       <property name="toolTip">
-        <string>Open a map file.</string>
-       </property>
-       <property name="whatsThis">
-        <string>Open an existing map file into the above table for editing.</string>
-       </property>
-       <property name="text">
-        <string>Open</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="newMapButton">
-       <property name="toolTip">
-        <string>Create a new map file.</string>
-       </property>
-       <property name="whatsThis">
-        <string>Resets the above table for a new map file.</string>
-       </property>
-       <property name="text">
-        <string>New Map</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Quit</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>mapTable</sender>
-   <signal>itemChanged(QTableWidgetItem*)</signal>
-   <receiver>mapTable</receiver>
-   <slot>resizeColumnsToContents()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>62</x>
-     <y>67</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>132</x>
-     <y>158</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>mapTable</sender>
    <signal>itemChanged(QTableWidgetItem*)</signal>
@@ -215,14 +265,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
+   <sender>quitButton</sender>
    <signal>clicked()</signal>
    <receiver>MapEditor</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>397</x>
-     <y>591</y>
+     <x>524</x>
+     <y>148</y>
     </hint>
     <hint type="destinationlabel">
      <x>478</x>

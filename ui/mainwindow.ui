@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>600</height>
+    <height>606</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,16 +32,6 @@
       </property>
       <property name="description">
        <string>Create and edit company map files.</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCommandLinkButton" name="templateCmd">
-      <property name="text">
-       <string>Spreadsheet templates</string>
-      </property>
-      <property name="description">
-       <string>Set up templates.</string>
       </property>
      </widget>
     </item>

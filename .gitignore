@@ -104,6 +104,8 @@ venv.bak/
 # Excel data files
 *.xlsx
 
+log.txt
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

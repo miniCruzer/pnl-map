@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(600, 600)
+        MainWindow.resize(600, 606)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -22,9 +22,6 @@ class Ui_MainWindow(object):
         self.mapEditCmd = QtWidgets.QCommandLinkButton(self.centralwidget)
         self.mapEditCmd.setObjectName("mapEditCmd")
         self.verticalLayout.addWidget(self.mapEditCmd)
-        self.templateCmd = QtWidgets.QCommandLinkButton(self.centralwidget)
-        self.templateCmd.setObjectName("templateCmd")
-        self.verticalLayout.addWidget(self.templateCmd)
         self.quitCmd = QtWidgets.QCommandLinkButton(self.centralwidget)
         self.quitCmd.setObjectName("quitCmd")
         self.verticalLayout.addWidget(self.quitCmd)
@@ -48,8 +45,6 @@ class Ui_MainWindow(object):
         self.wizardCmd.setDescription(_translate("MainWindow", "Convert a QuickBooks export to the Popeyes format."))
         self.mapEditCmd.setText(_translate("MainWindow", "Map files"))
         self.mapEditCmd.setDescription(_translate("MainWindow", "Create and edit company map files."))
-        self.templateCmd.setText(_translate("MainWindow", "Spreadsheet templates"))
-        self.templateCmd.setDescription(_translate("MainWindow", "Set up templates."))
         self.quitCmd.setText(_translate("MainWindow", "Quit"))
         self.quitCmd.setDescription(_translate("MainWindow", "Exit program."))
 

@@ -2,6 +2,7 @@
 QWizard for running through a full export from QuickBooks formatted data into the Popeyes specified
 spreadsheet.
 """
+import logging
 import os
 from typing import Dict, Tuple  # pylint: disable=unused-import
 
@@ -106,8 +107,25 @@ class ConverterThread(QThread):
         srcbk = workbook_load(self.srcbkpath)
         dstbk = workbook_load(self.dstbkpath)
 
+        try:
+            self.convert(srcbk, dstbk)
+        except:
+            logging.exception(
+                "exception occurred during spreadsheet conversion")
+            workbook_close(srcbk)
+            workbook_close(dstbk)
+            raise
+
+        workbook_close(srcbk)
+        self.resultReady.emit()
+
+    def convert(self, srcbk, dstbk) -> None:
+        """ actual convert method to allow cleanups """
+
         with open(self.mapfile) as fhandle:
-            map_dict = parse_map(fhandle.readlines())
+            map_data = parse_map(fhandle.read())
+
+        map_dict = map_data.data
 
         # TODO: refactor all these loops entirely into their own functions
         for srcshname, dstshname in self.sheet_map.items():
@@ -135,12 +153,9 @@ class ConverterThread(QThread):
                     continue
 
                 if row > 5:  # XXX: this should not be hardcoded
-                    worksheet_set_number_format(
-                        dstsh, "B", row, "#,##0.00;-#,##0.00")
-                    worksheet_set_number_format(
-                        dstsh, "D", row, "#,##0.00;-#,##0.00")
-                    worksheet_set_number_format(
-                        dstsh, "F", row, "#,##0.00;-#,##0.00")
+                    for column in map_data.config["destination_val_columns"].split(","):
+                        worksheet_set_number_format(
+                            dstsh, column, row, map_data.config["number_Format"])
 
                 method, term = map_dict[keyword]
 
@@ -158,9 +173,6 @@ class ConverterThread(QThread):
                 worksheet_cell_set_raw(dstsh, "F", row, values[2])
 
             self.completedSheet.emit(dstsh.Name)
-
-        workbook_close(srcbk)
-        self.resultReady.emit()
 
 
 def sheet_mapper(rows, tbl) -> QTableWidget:
