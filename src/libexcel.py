@@ -118,7 +118,7 @@ class ExcelThread(QThread):
     """ handle an excel spreadsheet in a thread """
 
     sheetOpened = pyqtSignal(str)
-    rowsReady = pyqtSignal(str, dict)
+    rowsReady = pyqtSignal(str, dict, str)
     sheetNamesReady = pyqtSignal(list)
 
     def __init__(self, path, parent=None):
@@ -154,8 +154,14 @@ class ExcelThread(QThread):
 
     def _load_pending_sheets(self):
         for sheet in self.pending_sheets:
-            self.loaded_sheets[sheet] = worksheet_load(
-                self.workbook, sheet)
+            if sheet in workbook_list_sheets(self.workbook):
+                self.loaded_sheets[sheet] = worksheet_load(
+                    self.workbook, sheet)
+            else:
+                self.rowsReady.emit(
+                    sheet, {}, f"no such sheet {sheet} in workbook")
+                continue
+
         self.pending_sheets = []
 
     def _process_pending_get(self):
@@ -163,18 +169,25 @@ class ExcelThread(QThread):
         for sheet, columns in self.pending_get.items():
 
             if sheet not in self.loaded_sheets:
-                self.loaded_sheets[sheet] = worksheet_load(
-                    self.workbook, sheet)
+                if sheet in workbook_list_sheets(self.workbook):
+                    self.loaded_sheets[sheet] = worksheet_load(
+                        self.workbook, sheet)
+                else:
+                    self.rowsReady.emit(
+                        sheet, {}, f"no such sheet {sheet} in workbook")
+                    continue
 
             cells = {row: data for row, data in worksheet_iter(
                 self.loaded_sheets[sheet], 1, columns, {column: None for column in columns})}
 
-            self.rowsReady.emit(sheet, cells)
+            self.rowsReady.emit(sheet, cells, "")
 
         self.pending_get = {}
 
     def get(self, sheet, columns):
-        """ request values of 'columns' from 'sheet' using worksheet_iter """
+        """ request values of 'columns' from 'sheet' using worksheet_iter. if 'sheet' has not yet
+        been loaded, an attempt will be made to load the sheet. If the sheet name does not exist in
+        the loaded workbook, resultReady will be instantly emitted with an empty dictionary. """
         self.pending_get[sheet] = columns
 
 
