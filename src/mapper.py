@@ -456,8 +456,10 @@ class MapEditor(Ui_MapEditor, QDialog):
             self._dirty = value
             if value:
                 logging.info("mapfile has been marked dirty")
+                self.setWindowTitle(self.windowTitle() + "*")
             else:
                 logging.info("mapfile has been marked clean")
+                self.setWindowTitle(self.windowTitle().replace("*", ""))
 
     def newRow(self):
         """ add a row to the map table """
@@ -508,7 +510,13 @@ class MapEditor(Ui_MapEditor, QDialog):
                 row, NAME_COL).currentText()
 
             if self.filterRegex.isChecked():
-                if re.search(text, cellText):
+
+                try:
+                    res = re.search(text, cellText)
+                except:
+                    return
+
+                if res:
                     hide = False
                 else:
                     hide = True
